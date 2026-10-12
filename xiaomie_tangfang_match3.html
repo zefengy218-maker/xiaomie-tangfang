@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#1688e8">
+<title>消灭唐芳 · 星星消消乐</title>
+<style>
+:root{--blue:#0877d7;--deep:#073c78;--pink:#ff4d91;--gold:#ffb51b;--purple:#a64bff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:white;background:linear-gradient(180deg,#48c2ff 0%,#b8eeff 52%,#d8f7d0 100%);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:radial-gradient(circle at 12% 12%,white 0 3px,transparent 4px),radial-gradient(circle at 83% 19%,white 0 4px,transparent 5px),radial-gradient(circle at 30% 70%,white 0 3px,transparent 4px);background-size:90px 90px,130px 130px,110px 110px}
+.app{max-width:650px;margin:auto;padding:16px 12px 30px;position:relative}
+header{text-align:center;margin:4px 0 14px}
+h1{font-size:clamp(28px,8vw,48px);line-height:1.1;margin:8px 0;color:#fff;text-shadow:0 4px 0 #0870c5,0 7px 12px #0059a866;letter-spacing:2px}
+.subtitle{display:inline-block;background:#0879d7;border:2px solid #73d9ff;border-radius:24px;padding:8px 16px;font-weight:800;box-shadow:0 4px 0 #0759a7}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.panel{background:linear-gradient(#e9f8ff,#8dd8ff);border:3px solid #1685dd;border-radius:18px;padding:9px 12px;color:#064781;text-align:center;box-shadow:0 5px 0 #0870bf}
+.panel small{display:block;font-weight:900;font-size:14px;color:#fff;background:#1685dd;border-radius:14px;padding:3px}
+.panel strong{font-size:25px;display:block;margin-top:2px}
+.goal{font-size:12px;font-weight:800;margin-top:2px}
+.board-wrap{padding:8px;background:linear-gradient(135deg,#168fe9,#0757ad);border:3px solid #73dfff;border-radius:22px;box-shadow:0 8px 0 #06417f,0 14px 25px #034c7d44}
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;background:#07386b;padding:5px;border-radius:13px;touch-action:manipulation}
+.tile{border:0;min-width:0;aspect-ratio:1/1;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:clamp(19px,5.8vw,32px);font-weight:1000;color:#fff;text-shadow:0 2px 0 #0003,0 0 4px #fff9;box-shadow:inset 0 3px 2px #ffffff9c,inset 0 -4px 0 #0002,0 2px 0 #032a56;cursor:pointer;user-select:none;transition:transform .12s,filter .12s;position:relative}
+.tile:after{content:"";position:absolute;top:10%;left:15%;width:25%;height:10%;background:#ffffff8c;border-radius:100%;transform:rotate(-30deg)}
+.tile:active{transform:scale(.91)}
+.tile.selected{outline:4px solid white;transform:scale(.9);filter:brightness(1.18)}
+.c0{background:linear-gradient(145deg,#ffd84c,#ff9b00 70%);color:#fff}.c1{background:linear-gradient(145deg,#ff8fbe,#f52c77 70%)}.c2{background:linear-gradient(145deg,#c18bff,#8229e8 70%)}.c3{background:linear-gradient(145deg,#65e3ff,#0788f0 70%)}
+.tile.empty{visibility:hidden;pointer-events:none}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.action{border:2px solid #ffffffa6;border-radius:18px;padding:10px 4px;color:white;font-size:14px;font-weight:900;box-shadow:0 4px 0 #06417f;cursor:pointer;background:linear-gradient(#a56bff,#7230db)}
+.action:nth-child(2){background:linear-gradient(#ffcf4b,#ff8e00)}.action:nth-child(3){background:linear-gradient(#54dc84,#13a54b)}
+.action span{display:block;font-size:24px}
+.message{background:#ffffffd9;color:#07518e;text-align:center;font-weight:900;border:2px solid #fff;border-radius:16px;padding:11px;margin:12px 0;min-height:44px}
+.bottom{text-align:center;color:#07518e;font-size:12px;font-weight:800;margin-top:14px}
+.modal{position:fixed;inset:0;background:#002b55a8;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+.modal.show{display:flex}.dialog{background:#e8f8ff;color:#07518e;border:4px solid #fff;border-radius:24px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 0 #06417f}
+.dialog h2{margin:0 0 8px}.dialog button{border:0;border-radius:15px;background:#0879d7;color:#fff;padding:12px 22px;font-weight:900;font-size:16px;margin:6px;cursor:pointer}
+@media(min-width:560px){.app{padding-top:24px}.tile{font-size:32px}.board{gap:6px;padding:8px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><h1>⭐ 消灭唐芳 ⭐</h1><div class="subtitle">点击相邻星星，凑齐 3 个或更多相同的字！</div></header>
+<section class="stats">
+ <div class="panel"><small>关卡</small><strong id="level">1</strong><div class="goal">目标：消除 30 颗星星</div></div>
+ <div class="panel"><small>得分</small><strong id="score">0</strong><div class="goal">最高连击：<span id="combo">0</span></div></div>
+</section>
+<div class="board-wrap"><div class="board" id="board" aria-label="消消乐游戏棋盘"></div></div>
+<div class="message" id="message" role="status">交换相邻星星，让“消、灭、唐、芳”连成一线！</div>
+<div class="controls">
+ <button class="action" id="hint"><span>💡</span>提示</button>
+ <button class="action" id="shuffle"><span>🔀</span>打乱</button>
+ <button class="action" id="restart"><span>🔄</span>重开</button>
+</div>
+<div class="bottom">✨ 消灭唐芳，从消星开始！ ✨<br>小提示：横向或纵向连成 3 个及以上即可消除。</div>
+</main>
+<div class="modal" id="modal"><div class="dialog"><h2 id="modalTitle">太棒了！</h2><p id="modalText">完成本关！</p><button id="continue">继续游戏</button><button id="close">返回棋盘</button></div></div>
+<script>
+(()=>{
+const W=8,H=8,CHARS=['消','灭','唐','芳'],COLORS=['c0','c1','c2','c3'];
+let grid=[],score=0,removed=0,level=1,busy=false,selected=-1,combo=0,bestCombo=0;
+const board=document.querySelector('#board'),msg=document.querySelector('#message');
+const $=s=>document.querySelector(s);
+function rand(){return Math.floor(Math.random()*4)}
+function makeGrid(){grid=Array.from({length:W*H},()=>rand());for(let i=0;i<grid.length;i++){let tries=0;while(tries++<20&&((i%W>=2&&grid[i]===grid[i-1]&&grid[i]===grid[i-2])||(i>=W*2&&grid[i]===grid[i-W]&&grid[i]===grid[i-W*2])))grid[i]=rand()} }
+function render(){board.innerHTML='';grid.forEach((v,i)=>{const b=document.createElement('button');b.className='tile '+(v<0?'empty':COLORS[v])+(selected===i?' selected':'');b.textContent=v<0?'':CHARS[v];b.setAttribute('aria-label',v<0?'空格':CHARS[v]+'星星');b.onclick=()=>clickTile(i);board.appendChild(b)});$('#score').textContent=score;$('#level').textContent=level;$('#combo').textContent=bestCombo}
+function matches(){const set=new Set();for(let r=0;r<H;r++)for(let c=0;c<W;c++){let i=r*W+c,v=grid[i];if(v<0)continue;let run=[i];for(let x=c+1;x<W&&grid[r*W+x]===v;x++)run.push(r*W+x);if(run.length>=3)run.forEach(n=>set.add(n));run=[i];for(let y=r+1;y<H&&grid[y*W+c]===v;y++)run.push(y*W+c);if(run.length>=3)run.forEach(n=>set.add(n))}return [...set]}
+function adjacent(a,b){return Math.abs(a-b)===W&&Math.max(a,b)<grid.length||Math.abs(a-b)===1&&Math.floor(a/W)===Math.floor(b/W)}
+function clickTile(i){if(busy||grid[i]<0)return;if(selected<0){selected=i;render();return}if(selected===i){selected=-1;render();return}if(!adjacent(selected,i)){selected=i;render();return}const a=selected;selected=-1;[grid[a],grid[i]]=[grid[i],grid[a]];const m=matches();if(!m.length){[grid[a],grid[i]]=[grid[i],grid[a]];msg.textContent='这次没有连成三个，再试试看！';render();return}resolve()}
+async function resolve(){busy=true;let chain=0;while(true){const m=matches();if(!m.length)break;chain++;combo=chain;bestCombo=Math.max(bestCombo,chain);score+=m.length*10*chain;removed+=m.length;msg.textContent=chain>1?`连击 x${chain}！消除了 ${m.length} 颗星星！`:`漂亮！消除了 ${m.length} 颗星星！`;m.forEach(i=>grid[i]=-1);render();await wait(180);for(let c=0;c<W;c++){let vals=[];for(let r=H-1;r>=0;r--){let v=grid[r*W+c];if(v>=0)vals.push(v)}while(vals.length<H)vals.push(rand());for(let r=H-1,j=0;r>=0;r--,j++)grid[r*W+c]=vals[j]}render();await wait(150)}busy=false;combo=0;render();if(removed>=30*level){showModal('恭喜过关！',`第 ${level} 关完成，继续消除更多星星吧！`)}else if(!hasMove()){msg.textContent='没有可消除的组合，已自动打乱棋盘。';shuffle()}}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+function hasMove(){for(let i=0;i<grid.length;i++){for(const j of [i+1,i+W])if(j<grid.length&&adjacent(i,j)){[grid[i],grid[j]]=[grid[j],grid[i]];let ok=matches().length>0;[grid[i],grid[j]]=[grid[j],grid[i]];if(ok)return true}}return false}
+function shuffle(){if(busy)return;for(let tries=0;tries<20;tries++){makeGrid();if(hasMove())break}selected=-1;render();msg.textContent='棋盘已打乱，继续挑战！'}
+function hint(){if(busy)return;for(let i=0;i<grid.length;i++)for(const j of [i+1,i+W])if(j<grid.length&&adjacent(i,j)){[grid[i],grid[j]]=[grid[j],grid[i]];const ok=matches().length>0;[grid[i],grid[j]]=[grid[j],grid[i]];if(ok){selected=i;render();setTimeout(()=>{if(selected===i){selected=-1;render()}},1300);msg.textContent='提示：发亮的星星可以尝试交换！';return}}msg.textContent='正在重新排列棋盘…';shuffle()}
+function showModal(title,text){$('#modalTitle').textContent=title;$('#modalText').textContent=text;$('#modal').classList.add('show')}
+$('#continue').onclick=()=>{level++;removed=0;score+=100;$('#modal').classList.remove('show');shuffle();msg.textContent=`进入第 ${level} 关！目标：再消除 ${30*level} 颗星星。`};
+$('#close').onclick=()=>$('#modal').classList.remove('show');
+$('#hint').onclick=hint;$('#shuffle').onclick=shuffle;
+$('#restart').onclick=()=>{score=0;removed=0;level=1;combo=0;bestCombo=0;selected=-1;makeGrid();render();msg.textContent='新的一局开始啦！把相同的字连起来消除吧。'};
+makeGrid();render();
+})();
+</script>
+</body></html>
